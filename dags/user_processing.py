@@ -1,6 +1,10 @@
+from datetime import datetime
+import json
+
 from airflow import DAG
 from airflow.providers.postgres.operators.postgres import PostgresOperator
-from datetime import datetime
+from airflow.providers.http.sensors.http import HttpSensor
+from airflow.providers.http.operators.http import SimpleHttpOperator
 
 with DAG('user_processing', start_date=datetime(2024, 1, 1), 
          schedule_interval='@daily', catchup=False) as dag:
@@ -19,3 +23,18 @@ with DAG('user_processing', start_date=datetime(2024, 1, 1),
                );
          """
           )
+    
+    is_api_available = HttpSensor(
+        task_id='is_api_available',
+        http_conn_id='user_api',
+        endpoint='https://randomuser.me/'
+    )
+    
+    extract_user = SimpleHttpOperator(
+        task_id='extract_user',
+        http_conn_id='user_api',
+        endpoint='api/',
+        method='GET',
+        response_filter=lambda response: json.loads(response.text),
+        log_response=True
+    )
