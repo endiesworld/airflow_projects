@@ -6,12 +6,13 @@ from airflow.decorators import task
 from airflow.operators.bash import BashOperator
 
 my_file = Dataset("/tmp/my_file.txt")
+my_file_2 = Dataset("/tmp/my_file_2.txt")
 
 # A DAG represents a workflow, a collection of tasks
 with DAG(
     dag_id="consumer", 
     start_date=datetime(2022, 1, 1), 
-    schedule=[my_file],
+    schedule=[my_file, my_file_2],
     catchup=False) as dag:
     # Tasks are represented as operators
     hello = BashOperator(task_id="hello", bash_command="echo hello")
