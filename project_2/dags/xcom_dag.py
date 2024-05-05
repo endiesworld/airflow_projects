@@ -4,11 +4,11 @@ from airflow.operators.bash import BashOperator
  
 from datetime import datetime
  
-def _t1():
-    return 'T1 returned value'
+def _t1(ti): #ti is task instance. When a task runs it creates a task instance
+    ti.xcom_push(key="my key", value="my value: 42")
  
-def _t2():
-    None
+def _t2(ti):
+    print(ti.xcom_pull(key='my key', task_ids='t1'))
  
 with DAG("xcom_dag", start_date=datetime(2022, 1, 1), 
     schedule_interval='@daily', catchup=False) as dag:
